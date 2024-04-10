@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingresar Venta</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Restablecer los campos al cargar la página
+    limpiarCampos();
+
+    $('#idProCatCategoria, #idProCatSubCategoria').change(function() {
+        var categoria_id = $('#idProCatCategoria').val();
+        var subcategoria_id = $('#idProCatSubCategoria').val();
+        
+        console.log('Categoria ID:', categoria_id);
+        console.log('Subcategoria ID:', subcategoria_id);
+        
+        $.ajax({
+            url: '/get_productos/',
+            type: 'GET',
+            data: {
+                'categoria_id': categoria_id,
+                'subcategoria_id': subcategoria_id
+            },
+            dataType: 'json',
+            success: function(data) {
+                var options = '';
+                for (var i = 0; i < data.length; i++) {
+                    options += '<option value="' + data[i].idPro + '">' + data[i].StrNombrePro + '</option>';
+                }
+                $('#producto').html(options);
+            }
+        });
+    });
+
+    $('#producto').change(function() {
+        var producto_id = $(this).val();
+        console.log('Producto ID:', producto_id);
+
+        $.ajax({
+            url: '/get_producto_details/',
+            type: 'GET',
+            data: {
+                'producto_id': producto_id
+            },
+            dataType: 'json',
+            success: function(data) {
+                $('#stock').val(data.stock);
+                $('#precio').val(data.precio);
+                calcularTotal(); // Calcular total al seleccionar un producto
+            }
+        });
+    });
+
+    $('#cantidad').on('input', function() {
+        calcularTotal();
+    });
+
+    // Función para agregar elementos al carrito
+    $('#agregar').click(function() {
+        var producto = $('#producto option:selected').text();
+        var precio = parseFloat($('#precio').val());
+        var cantidad = parseFloat($('#cantidad').val());
+        var total = parseFloat($('#total').val());
+
+        // Calcular el total del producto
+        var totalProducto = precio * cantidad;
+
+        var fila = '<div class="carrito-item">' +
+                       '<div class="carrito-item-nombre">' + producto + '</div>' +
+                       '<div class="carrito-item-precio">$' + precio + '</div>' + 
+                       '<div class="carrito-item-cantidad">' + cantidad + '</div>' +
+                       '<div class="carrito-item-total">$' + totalProducto + '</div>' + 
+                       '<div>' +
+                         '<button class="eliminar-producto">Eliminar</button>' +
+                         '<button class="editar-producto">Editar</button>' + 
+                       '</div>' +
+                   '</div>';
+
+        // Función para editar un producto del carrito
+        $(document).on('click', '.editar-producto', function() {
+            // Puedes agregar aquí la lógica para editar el producto
+            alert('Editar producto');
+        });
+
+        // Agregar la fila al carrito
+        $('#carrito').append(fila);
+        actualizarBotonAlmacenar(); // Actualizar la posición del botón de almacenar
+    });
+
+    function limpiarCampos() {
+    $('#idProCatCategoria, #idProCatSubCategoria, #producto, #stock, #precio, #cantidad, #total, #idVenVenta').val('');
+}
+
+    // Función para calcular el total
+    function calcularTotal() {
+        var cantidad = parseFloat($('#cantidad').val());
+        var precio = parseFloat($('#precio').val());
+        var total = cantidad * precio;
+        $('#total').val(total.toFixed(2)); // Mostrar el total en el campo correspondiente
+    }
+
+    // Función para eliminar un producto del carrito
+    $(document).on('click', '.eliminar-producto', function() {
+        $(this).closest('.carrito-item').remove();
+        actualizarBotonAlmacenar(); // Actualizar la posición del botón de almacenar
+    });
+
+    // Función para actualizar la posición del botón de almacenar
+    function actualizarBotonAlmacenar() {
+        var boton = $('.almacenar-carrito');
+        if ($('#carrito').find('.carrito-item').length > 0) {
+            if (!boton.length) {
+                $('#carrito').append('<button class="almacenar-carrito">Almacenar al carrito</button>');
+            }
+        } else {
+            boton.remove();
+        }
+    }
+
+    $('#folio').change(function() {
+    var folioSeleccionado = $(this).val();
+    $('#idVenVenta').val(folioSeleccionado); // Establecer el valor del campo oculto directamente
+});
+
+    // Función para enviar los datos del carrito al backend
+    $(document).on('click', '.almacenar-carrito', function() {
+    var idVenVenta = $('#idVenVenta').val();
+    console.log('ID de la venta:', idVenVenta);
+
+        var productos_carrito = [];
+
+        // Recorre todos los elementos del carrito y obtén sus detalles
+        $('.carrito-item').each(function() {
+            var producto = $(this).find('.carrito-item-nombre').text();
+            var precio = $(this).find('.carrito-item-precio').text().replace('$', '');
+            var cantidad = $(this).find('.carrito-item-cantidad').text();
+            var total = $(this).find('.carrito-item-total').text().replace('$', '');
+
+            // Agrega los detalles del producto al arreglo de productos del carrito
+            productos_carrito.push({
+                'idVenVenta': idVenVenta, // Incluye el ID de la venta en los datos del producto
+                'producto': producto,
+                'precio': parseFloat(precio),
+                'cantidad': parseFloat(cantidad),
+                'total': parseFloat(total)
+            });
+        });
+
+        // Obtener el token CSRF
+        var csrfToken = $('#csrf_token').val();
+
+        // Realiza una llamada AJAX para enviar los datos al backend
+        $.ajax({
+            url: '/almacenar_carrito/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({ 'productos_carrito': productos_carrito }),
+            dataType: 'json',
+            success: function(response) {
+                alert(response.message);
+                $('.carrito-item').remove();
+            },
+            error: function(xhr, status, error) {
+                alert('Error al almacenar los productos en el carrito');
+            }
+        });
+    });
+});
+</script>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+  
+    form, .seccion {
+      max-width: 400px; /* Ajustar ancho del formulario */
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  
+    label {
+      font-weight: bold;
+    }
+  
+    input[type="text"],
+    select {
+      width: calc(100% - 20px); /* Ajustar ancho de los campos */
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+  
+    hr {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 20px 0;
+    }
+  
+    button[type="button"] {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+  
+    button[type="button"]:hover {
+      background-color: #0056b3;
+    }
+
+    /* Estilos para el carrito de compras */
+    .carrito-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .carrito-item-nombre,
+    .carrito-item-precio,
+    .carrito-item-cantidad,
+    .carrito-item-total {
+      flex-basis: 20%;
+      text-align: center;
+    }
+
+    .carrito-item:last-child {
+      border-bottom: none;
+    }
+
+    .carrito-header {
+      font-weight: bold;
+    }
+
+    .seccion {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px; /* Cambia este valor según tus necesidades */
+}
+
+    /* Estilos para el botón de eliminar */
+    .eliminar-producto {
+      background-color: #f70808;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* Estilos para el botón de almacenar al carrito */
+    .almacenar-carrito {
+      background-color: #4c06e3;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .editar-producto {
+        background-color: #52b964;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-right: 5px; 
+    }
+    .eliminar-producto,
+.almacenar-carrito,
+.editar-producto {
+    margin-right: 10px; 
+}
+.menu-bar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .menu-bar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-bar li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .menu-bar a:hover {
+            text-decoration: underline;
+        }
+
+
+</style>
+</head>
+<body>
+  <div class="menu-bar">
+    <ul>
+        <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+        <li><a href="{% url 'sesion' %}">Login</a></li>
+        <a href="{% url 'logout' %}">Cerrar sesión</a>
+        <li><a href="{% url 'puntoventa' %}">Punto de Venta</a></li>
+        <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+        <li><a href="{% url 'bienvenida' %}">Home</a></li>
+    </ul>
+</div>
+  <div class="seccion">
+    <h2>Agregar Venta</h2>
+    <form action="#" method="POST">
+      {% csrf_token %}
+      <label for="folio">Folio:</label><br>
+      <select id="folio" name="folio">
+          {% for folio in folios %}
+          <option value="{{ folio }}">{{ folio }}</option>
+          {% endfor %}
+      </select><br>
+      
+      <!-- Campo oculto para almacenar el idVenVenta -->
+      <input type="hidden" id="idVenVenta" name="idVenVenta">
+      <!-- Campo oculto para almacenar el token CSRF -->
+      <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+      <label for="idProCatCategoria">Categoría:</label><br>
+      <select id="idProCatCategoria" name="idProCatCategoria">
+        {% for categoria in categorias %}
+        <option value="{{ categoria.idCat }}">{{ categoria.strNombreCategoria }}</option>
+        {% endfor %}
+      </select><br>
+          
+      <label for="idProCatSubCategoria">Subcategoría:</label><br>
+      <select id="idProCatSubCategoria" name="idProCatSubCategoria">
+        {% for subcategoria in subcategorias %}
+        <option value="{{ subcategoria.idSubCat }}">{{ subcategoria.strNombreSubCategoria }}</option>
+        {% endfor %}
+      </select><br>
+      <!-- Aquí se actualiza el campo de "Productos Disponibles" según la selección de categoría y subcategoría -->
+      <label for="producto">Productos Disponibles:</label><br>
+      <select id="producto" name="producto">
+        {% for producto in productos %}
+        <option value="{{ producto.idPro }}">{{ producto.StrNombrePro }}</option>
+        {% endfor %}
+      </select><br>
+    
+      <label for="stock">Stock:</label><br>
+      <input type="text" id="stock" name="stock" readonly><br>
+    
+      <label for="precio">Precio:</label><br>
+      <input type="text" id="precio" name="precio" readonly><br>
+    
+      <label for="cantidad">Cantidad:</label><br>
+      <input type="text" id="cantidad" name="cantidad"><br>
+    
+      <label for="total">Total:</label><br>
+      <input type="text" id="total" name="total" readonly><br>
+    
+      <button type="button" id="agregar">Agregar al carrito de compras</button>
+    </form>
+  </div>
+
+  <!-- Carrito de Compras -->
+  <div class="seccion">
+    <h3>Carrito de Compras</h3>
+    <div id="carrito">
+      <div class="carrito-item carrito-header">
+        <div>Producto</div>
+        <div>Precio</div>
+        <div>Cantidad</div>
+        <div>Total</div>
+        <div>Acciones</div>
+      </div>
+    </div>
+    <button class="almacenar-carrito">Almacenar al carrito</button>
+  </div>
+</body>
+</html>

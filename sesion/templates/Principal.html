@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal</title>
+    <style>
+        body {
+            background-color: #fff; 
+            color: #2980b9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center;
+            padding-top: 50px; 
+        }
+        h1 {
+            font-size: 3em; 
+            margin-bottom: 20px; 
+        }
+        p {
+            font-size: 1.2em; 
+            margin-bottom: 20px; 
+        }
+        #walmart-image {
+            max-width: 60%; 
+            height: auto; 
+            margin: 50px auto; 
+            display: block; 
+            border-radius: 10px; 
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); 
+        }
+        #siguiente-btn {
+            background-color: #3498db; 
+            color: #fff; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 20px; 
+            font-size: 1.2em; 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+        }
+        #siguiente-btn:hover {
+            background-color: #2980b9; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido a Walmart</h1>
+    <p>¡Descubre nuestros increíbles productos!</p>
+  
+    <img src="{% static 'walmart4.png' %}" alt="Walmart Logo" id="walmart-image">
+
+    <br>
+    <button id="siguiente-btn">Siguiente</button>
+
+    <script>
+        document.getElementById("siguiente-btn").addEventListener("click", function() {
+            window.location.href = "{% url 'bienvenida' %}";
+        });
+    </script>
+</body>
+</html>

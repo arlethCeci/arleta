@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Usuario</title>
+    <style>
+          .menu-bar {
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.menu-bar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-bar li {
+  display: inline;
+  margin: 0 10px;
+}
+
+.menu-bar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.menu-bar a:hover {
+  text-decoration: underline;
+}
+body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .form-container {
+            margin-top: 20px; 
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #ff3333;
+            color: #fff;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        a {
+            text-decoration: none;
+            color: #333;
+        }
+        a:hover {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <ul>
+            <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+            <li><a href="{% url 'sesion' %}">Login</a></li>
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+            <li><a href="{% url 'puntoventa' %}">Punto de Venta</a></li>
+            <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+            <li><a href="{% url 'bienvenida' %}">Home</a></li>
+        </ul>
+    </div>
+    <div class="container">
+    <h1>Eliminar Usuario</h1>
+    <p>¿Estás seguro de que deseas eliminar al usuario {{ usuario.strNombre }}?</p>
+    <ul>
+        <li><strong>Nombre:</strong> {{ usuario.strNombre }}</li>
+        <li><strong>Estado:</strong> {% if usuario.idUsuCatEstado == 1 %} Activo {% else %} Inactivo {% endif %}</li>
+        <li><strong>Tipo de Usuario:</strong> {% if usuario.idUsuCatTipoUsuario == 1 %} Administrador {% else %} Usuario Normal {% endif %}</li>
+       
+    </ul>
+    <form action="{% url 'eliminar_usuario' usuario.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Eliminar</button>
+        <a href="{% url 'bienvenida' %}"><button type="button">Cancelar</button></a>
+    </form>
+</body>
+</div>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenida a mi Proyecto Django</title>
+    <style>
+
+        .menu-bar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .menu-bar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-bar li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .menu-bar a:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        body {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+            text-align: center; 
+            margin: 0; 
+            padding-top: 50px; 
+        }
+    
+        h1 {
+            color: #0066cc;
+        }
+    
+        p {
+            color: #333;
+        }
+        
+        button {
+            background-color: #0066cc;
+            color: #fff;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="menu-bar">
+        <ul>
+            <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+            <li><a href="{% url 'sesion' %}">Login</a></li>
+            <li><a href="#">Cerrar Sesión</a></li>
+            <li><a href="#">Punto de Venta</a></li>
+            <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+            <li><a href="{% url 'bienvenida' %}">Home</a></li>
+          
+        </ul>
+    </div>
+    
+    <h1>Usuario</h1>
+    <p>¡Gracias por visitarnos!</p>
+
+
+    <form id="search-form">
+        <input type="text" id="busquedaNombre" placeholder="Buscar por nombre">
+        <select id="busquedaEstado">
+            <option value="">Estado: Todos</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select>
+        <select id="busquedaTipo">
+            <option value="">Tipo de Usuario: Todos</option>
+            <option value="administrador">Administrador</option>
+            <option value="normal">Usuario Normal</option>
+        </select>
+        <button type="button" onclick="filtrarUsuarios()">Buscar</button>
+    </form>
+
+ 
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre del usuario</th>
+                <th>Estado</th>
+                <th>Tipo de usuario</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in page_obj %}
+                <tr>
+                    <td>{{ usuario.strNombre }}</td>
+                    <td>{% if usuario.idUsuCatEstado == 1 %} Activo {% elif usuario.idUsuCatEstado == 2 %} Inactivo {% endif %}</td>
+                    <td>{% if usuario.idUsuCatTipoUsuario == 1 %} Administrador {% elif usuario.idUsuCatTipoUsuario == 2 %} Usuario Normal {% endif %}</td>
+                    <td><button onclick="editarUsuario('{{ usuario.id }}')">Editar</button></td>
+                    <td><button onclick="eliminarUsuario('{{ usuario.id }}')">Eliminar</button></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<div>
+    <button id="anteriorButton">Anterior</button>
+    <button id="siguienteButton">Siguiente</button>
+</div>
+
+<script>
+    document.getElementById('anteriorButton').addEventListener('click', function() {
+        var currentPage = parseInt('{{ page_obj.number }}');
+        if (currentPage > 1) {
+            window.location.href = "?page=" + (currentPage - 1);
+        }
+    });
+
+    document.getElementById('siguienteButton').addEventListener('click', function() {
+        var currentPage = parseInt('{{ page_obj.number }}');
+        var totalPages = parseInt('{{ page_obj.paginator.num_pages }}');
+        if (currentPage < totalPages) {
+            window.location.href = "?page=" + (currentPage + 1);
+        }
+    });
+</script>
+
+  
+    <script>
+        function filtrarUsuarios() {
+            var nombre = document.getElementById('busquedaNombre').value.toLowerCase();
+            var estado = document.getElementById('busquedaEstado').value;
+            var tipo = document.getElementById('busquedaTipo').value;
+
+            var usuarios = document.getElementsByTagName('tr');
+
+            for (var i = 1; i < usuarios.length; i++) {
+                var usuario = usuarios[i];
+                var nombreUsuario = usuario.cells[0].textContent.toLowerCase();
+                var estadoUsuario = usuario.cells[1].textContent.toLowerCase();
+                var tipoUsuario = usuario.cells[2].textContent.toLowerCase();
+
+                if ((nombreUsuario.indexOf(nombre) > -1 || nombre === '') &&
+                    (estadoUsuario.indexOf(estado) > -1 || estado === 'todos' || estado === '') &&
+                    (tipoUsuario.indexOf(tipo) > -1 || tipo === 'todos' || tipo === '')) {
+                    usuario.style.display = '';
+                } else {
+                    usuario.style.display = 'none';
+                }
+            }
+        }
+
+        function editarUsuario(userId) {
+            window.location.href = "/editar_usuario/" + userId;
+        }
+
+        function eliminarUsuario(userId) {
+            window.location.href = "/eliminar_usuario/" + userId;
+        }
+    </script>
+
+</body>
+</html>

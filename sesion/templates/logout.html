@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerrar Sesión</title>
+    <!-- Agrega estilos CSS -->
+    <style>
+          .menu-bar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .menu-bar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-bar li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .menu-bar a:hover {
+            text-decoration: underline;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .cancel-button {
+            margin-top: 20px;
+            display: inline-block;
+        }
+        .cancel-button button {
+            background-color: #dc3545;
+        }
+        .cancel-button button:hover {
+            background-color: #bd2130;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <ul>
+            <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+            <li><a href="{% url 'sesion' %}">Login</a></li>
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+            <li><a href="{% url 'puntoventa' %}">Punto de Venta</a></li>
+            <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+            <li><a href="{% url 'bienvenida' %}">Home</a></li>
+        </ul>
+    </div>
+
+<!-- Contenido de la página -->
+<div class="container">
+    <h1>¿Seguro que deseas cerrar sesión?</h1>
+    <!-- Formulario para cerrar sesión -->
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Cerrar sesión</button>
+        <!-- Campo oculto para redireccionar después de cerrar sesión -->
+        <input type="hidden" name="next" value="{% url 'sesion' %}">
+    </form>
+    
+    <!-- Enlace para cancelar -->
+    <div class="cancel-button">
+        <a href="{% url 'bienvenida' %}"><button type="button">Cancelar</button></a>
+    </div>
+</div>
+
+</body>
+</html>

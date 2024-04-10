@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .form-container {
+            margin-top: 20px; /* Espacio adicional entre el formulario y el contenido superior */
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            display: inline-block;
+            text-align: left;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #0066cc;
+            color: #fff;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background-color: #0050a5;
+        }
+        .menu-bar {
+  width: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.menu-bar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-bar li {
+  display: inline;
+  margin: 0 10px;
+}
+
+.menu-bar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.menu-bar a:hover {
+  text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <ul>
+            <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+            <li><a href="{% url 'sesion' %}">Login</a></li>
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+            <li><a href="{% url 'puntoventa' %}">Punto de Venta</a></li>
+            <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+            <li><a href="{% url 'bienvenida' %}">Home</a></li>
+        </ul>
+    </div>
+
+
+    <div class="container">
+        <h1>Editar Usuario</h1>
+        <div class="form-container"> <!-- Contenedor para el formulario -->
+            <form action="{% url 'editar_usuario' usuario.id %}" method="post">
+                {% csrf_token %}
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" value="{{ usuario.strNombre }}" required>
+                <label for="estado">Estado:</label>
+                <select id="estado" name="estado">
+                    <option value="1" {% if usuario.idUsuCatEstado == 1 %} selected {% endif %}>Activo</option>
+                    <option value="2" {% if usuario.idUsuCatEstado == 2 %} selected {% endif %}>Inactivo</option>
+                </select>
+                <label for="tipo_usuario">Tipo de Usuario:</label>
+                <select id="tipo_usuario" name="tipo_usuario">
+                    <option value="1" {% if usuario.idUsuCatTipoUsuario == 1 %} selected {% endif %}>Administrador</option>
+                    <option value="2" {% if usuario.idUsuCatTipoUsuario == 2 %} selected {% endif %}>Usuario Normal</option>
+                </select>
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+    
+    </body>
+    </html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Búsqueda de Productos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+  }
+
+  #container {
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    width: 80%;
+    max-width: 800px;
+  }
+
+  h1 {
+    color: #333333;
+    text-align: center;
+  }
+
+  form {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  label {
+    margin-bottom: 5px;
+    color: #333333;
+    font-weight: bold;
+  }
+
+  input, select {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    flex: 1;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .product-container {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .product-item {
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .product-item p {
+    margin: 5px 0;
+  }
+
+  .product-item button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .menu-bar {
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .menu-bar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-bar li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .menu-bar a:hover {
+            text-decoration: underline;
+        }
+        table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #333;
+    color: #fff;
+}
+button {
+            background-color: #0066cc;
+            color: #fff;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+</style> 
+</head>
+<body>
+  <div class="menu-bar">
+    <ul>
+        <li><a href="{% url 'producto' %}" class="product-link">Productos</a></li>
+        <li><a href="{% url 'sesion' %}">Login</a></li>
+        <a href="{% url 'logout' %}">Cerrar sesión</a>
+        <li><a href="{% url 'puntoventa' %}">Punto de Venta</a></li>
+        <li><a href="{% url 'agregar_usuario' %}">Registrar</a></li>
+        <li><a href="{% url 'bienvenida' %}">Home</a></li>
+    </ul>
+</div>
+
+
+<div id="container">
+
+  <h1>Búsqueda de Productos</h1>
+
+  <form id="search-form" method="post" action="{% url 'producto' %}" onsubmit="return validarFormulario()">
+    {% csrf_token %}
+
+    <label for="nombre_producto">Buscar por Nombre de Producto:</label>
+<input type="text" id="nombre_producto" name="nombre_producto" placeholder="Ingrese el nombre del producto">
+
+    <label for="categoria">Buscar por Categoría:</label>
+    <select id="categoria" name="categoria">
+      <option value="">Seleccione una categoría</option>
+      {% for categoria in categorias %}
+      <option value="{{ categoria.idCat }}">{{ categoria.strNombreCategoria }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="subcategoria">Buscar por Subcategoría:</label>
+<select id="subcategoria" name="subcategoria">
+  <option value="">Seleccione una subcategoría</option>
+
+  {% for subcategoria in subcategorias %}
+    <option value="{{ subcategoria.idSubCat }}">{{ subcategoria.strNombreSubCategoria }}</option>
+  {% endfor %}
+</select>
+
+
+    <button type="submit" name="action" value="buscar">Buscar</button>
+    <button type="button" onclick="window.location.href='/agregar_producto/'">Agregar Nuevo Producto</button>
+  </form>
+</div>
+
+<h2>Productos:</h2>
+<div id="resultados" class="product-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre del producto</th>
+        <th>Descripción</th>
+        <th>Categoría</th>
+        <th>Subcategoría</th>
+        <th>Máximos</th>
+        <th>Mínimos</th>
+        <th>Costo</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <!-- Agrega más columnas si es necesario -->
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for producto in productos %}
+      <tr>
+        <td>{{ producto.StrNombrePro }}</td>
+        <td>{{ producto.StrDescriptcion }}</td>
+        <td>{{ producto.idProCatCategoria.strNombreCategoria }}</td>
+        <td>{{ producto.idProCatSubCategoria.strNombreSubCategoria }}</td>
+        <td>{{ producto.decMaximo }}</td>
+        <td>{{ producto.decMinimo }}</td>
+        <td>{{ producto.curCosto }}</td>
+        <td>{{ producto.curPrecio }}</td>
+        <td>{{ producto.stock }}</td>
+        <!-- Agrega más columnas si es necesario -->
+        <td>
+          <button onclick="eliminarProducto('{{ producto.idPro }}')">Eliminar</button>
+          <button onclick="editarProducto('{{ producto.idPro }}')">Editar</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="sin-resultados" style="display: none;">
+  <p>No se encontraron resultados.</p>
+</div>
+
+<div id="pagination-buttons" style="text-align: center; margin-top: 20px;">
+  <button id="anteriorButton">Anterior</button>
+  <button id="siguienteButton">Siguiente</button>
+</div>
+
+<script>
+  document.getElementById('anteriorButton').addEventListener('click', function() {
+      var currentPage = parseInt('{{ productos.number }}');
+      if (currentPage > 1) {
+          window.location.href = "?page=" + (currentPage - 1);
+      }
+  });
+
+  document.getElementById('siguienteButton').addEventListener('click', function() {
+      var currentPage = parseInt('{{ productos.number }}');
+      var totalPages = parseInt('{{ productos.paginator.num_pages }}');
+      if (currentPage < totalPages) {
+          window.location.href = "?page=" + (currentPage + 1);
+      }
+  });
+  function eliminarProducto(idProducto) {
+    window.location.href = '/eliminar_producto/' + idProducto + '/';
+  }
+
+  function editarProducto(idProducto) {
+    window.location.href = '/editar_producto/' + idProducto + '/';
+  }
+
+  function validarFormulario() {
+
+    return true;
+  }
+</script>
+
+</body>
+</html>
